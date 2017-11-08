@@ -42,9 +42,9 @@ const Main = StackNavigator({
 })
 
 export default class App extends Component<{}> {
-  xmpp = null
+  //xmpp = null
   componentDidMount() {
-    this.xmpp = new xmpp(config)
+    ///this.xmpp = new xmpp(config)
   }
 
   componentWillUnmount() {
