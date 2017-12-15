@@ -1,3 +1,4 @@
+import orderBy from 'lodash/orderBy'
 const defaultState = {
   user: null,
   jid: null,
@@ -44,6 +45,17 @@ const chat = (state = defaultState, action) => {
 
       list.unshift(action.payload)
       root[key] = list
+      return {...state, messages: root}
+
+    case 'MESSAGE_FETCHED':
+      key = `${state.jid}:${action.payload.recipient}`
+      root = {...state.messages}
+      list = Array.isArray(root[key]) ? [...root[key]] : []
+
+      list.unshift(action.payload)
+      let sorted = orderBy(list, l=> l.createdAt.getTime(), ['desc'])
+      console.log('sorted ', sorted)
+      root[key] = sorted
       return {...state, messages: root}
     default:
       return state;

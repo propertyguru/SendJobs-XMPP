@@ -19,9 +19,17 @@ class JobListView extends Component {
     };
     this.props.screenProps.xmpp.xmppObject.on('error', this.showAlert.bind(this))
 
+    this.props.screenProps.xmpp.xmppObject.on('message', this.onM.bind(this))
   }
 
 
+  onM(m) {
+    console.log('>>>> ', m)
+  }
+
+  onIq(iq) {
+    console.log('... ', iq)
+  }
   showAlert(e) {
     Alert.alert(
       'Could not send message',
@@ -33,8 +41,46 @@ class JobListView extends Component {
   }
 
   componentDidMount() {
-    //console.log('>> ',this.props)
-    axios.get(`http://localhost:1337/parse/classes/job`, {
+    console.log('>> ',this.props)
+    const {xmpp} = this.props.screenProps
+
+    const customXML =
+      `<iq type='get' id='past_chat'>
+        <query xmlns='urn:xmpp:mam:tmp'>
+          <x xmlns='jabber:x:data' type='submit'>
+            <field var='FORM_TYPE' type='hidden'>
+              <value>urn:xmpp:mam:2</value>
+            </field>
+            <field var='with'>
+              <value>${'zibon@sendjob'}</value>
+            </field>
+          </x>
+        </query>
+       </iq>`
+
+    const second =
+      `<iq type='set' id='sendjob'>
+            <query xmlns='urn:xmpp:mam:2' queryid='f27' />
+        </iq>`
+
+    const third =
+      `<iq type='get' id='get_archive_user1'>
+        <query xmlns='urn:xmpp:mam:tmp'>
+          <with>zibon@sendjob</with>
+          <set xmlns='http://jabber.org/protocol/rsm'>
+            <max>2</max>
+          </set>
+        </query>
+      </iq>`
+
+
+
+
+    console.log('sendin stanza')
+    xmpp.xmppObject.sendStanza(third)
+    // xmpp.sendMessage('qwe qwe qwe','zibon@sendjob')
+
+    /*axios.get(`http://localhost:1337/parse/classes/job`, {
       headers: {
         'X-Parse-Application-Id': 'sendjob'
       }
@@ -42,7 +88,7 @@ class JobListView extends Component {
       console.log('data fetch ', res.data)
       this.setState({jobs: res.data.results.filter(x => x.createdBy)})
     })
-      .catch(err => console.log('fetch err ', err))
+      .catch(err => console.log('fetch err ', err))*/
 
     /*fetch('http://api.sendjobs.co:1337/parse/classes/job',{
       method: 'GET',

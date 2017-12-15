@@ -21,20 +21,65 @@ class Messenger extends Component {
 
     this.renderSystemMessage = this.renderSystemMessage.bind(this);
     this.onSend = this.onSend.bind(this)
+    this.props.screenProps.xmpp.xmppObject.on('iq', this.onIq.bind(this))
+  }
+
+  onIq(iq) {
+    console.log('... ', iq)
+    this.setState({past: iq})
+  }
+
+
+  loadEarlierMessage() {
+    const { xmpp } = this.props.screenProps
+    const third =
+      `<iq type='get' id='get_archive_user1'>
+        <query xmlns='urn:xmpp:mam:tmp'>
+          <with>zibon@sendjob</with>
+          <set xmlns='http://jabber.org/protocol/rsm'>
+            <max>1</max>
+            
+            ${this.state.past ? `<before>${this.state.past.query.set.last}</before>`: `<before/>`}
+          </set>
+        </query>
+      </iq>`
+
+    // <set xmlns='http://jabber.org/protocol/rsm'>
+    //  <max>50</max>
+    // </set>
+    console.log('*** ', third)
+    xmpp.xmppObject.sendStanza(third)
   }
 
   onReceiveMessage(text) {
-    if (!text.body)
+    // console.log('received message ', text)
+    if (!text.body && !text.result)
       return
 
-    this.props.receiveMessage({
-      _id: uuidv4(),
-      text: text.body,
-      createdAt: new Date(),
-      user: {
-        _id: text.from.split('@')[0]
-      }
-    })
+    if(text.result) {
+      const { message, delay } = text.result.forwarded
+      let {params} = this.props.navigation.state
+      this.props.fetchMessage({
+        _id: uuidv4(),
+        text: message.body,
+        createdAt: new Date(delay.stamp),
+        user: {
+          _id: message.from.split('@')[0]
+        },
+        recipient: params.user.publicKey
+      })
+    }
+
+    if(text.body) {
+      this.props.receiveMessage({
+        _id: uuidv4(),
+        text: text.body,
+        createdAt: new Date(),
+        user: {
+          _id: text.from.split('@')[0]
+        }
+      })
+    }
 
   }
 
@@ -73,6 +118,8 @@ class Messenger extends Component {
         chattingWith={this.props.navigation.state.params.user.publicKey}
         onSend={this.onSend}
         onReceiveMessage={this.onReceiveMessage.bind(this)}
+        loadEarlier={true}
+        onLoadEarlier={() => this.loadEarlierMessage()}
         user={{
           _id: this.props.chat.jid
         }}
@@ -104,7 +151,8 @@ const mapStateToProps = (store, ownProps) => {
 const mapDisPatchToProps = (dispatch, ownProps) => {
   return {
     sendMessage: (msg) => dispatch({type: 'MESSAGE_SENT', payload: msg}),
-    receiveMessage: (msg) => dispatch({type: 'MESSAGE_RECEIVED', payload: msg})
+    receiveMessage: (msg) => dispatch({type: 'MESSAGE_RECEIVED', payload: msg}),
+    fetchMessage: (msg) => dispatch({ type: 'MESSAGE_FETCHED', payload: msg})
   }
 }
 
