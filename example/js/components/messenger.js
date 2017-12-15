@@ -17,6 +17,7 @@ class Messenger extends Component {
     super(props)
     this.state = {
       messages: [],
+      hasMore: true
     };
 
     this.renderSystemMessage = this.renderSystemMessage.bind(this);
@@ -26,7 +27,7 @@ class Messenger extends Component {
 
   onIq(iq) {
     console.log('... ', iq)
-    this.setState({past: iq})
+    this.setState({past: iq, hasMore : Boolean(iq.query.set.first)}) // require for chat pagination
   }
 
 
@@ -37,9 +38,8 @@ class Messenger extends Component {
         <query xmlns='urn:xmpp:mam:tmp'>
           <with>zibon@sendjob</with>
           <set xmlns='http://jabber.org/protocol/rsm'>
-            <max>1</max>
-            
-            ${this.state.past ? `<before>${this.state.past.query.set.last}</before>`: `<before/>`}
+            <max>6</max>
+            ${this.state.past ? `<before>${this.state.past.query.set.first}</before>`: `<before/>`}
           </set>
         </query>
       </iq>`
@@ -52,7 +52,7 @@ class Messenger extends Component {
   }
 
   onReceiveMessage(text) {
-    // console.log('received message ', text)
+    console.log('received message ', text.result.id, text.result.forwarded.message.body)
     if (!text.body && !text.result)
       return
 
@@ -118,7 +118,7 @@ class Messenger extends Component {
         chattingWith={this.props.navigation.state.params.user.publicKey}
         onSend={this.onSend}
         onReceiveMessage={this.onReceiveMessage.bind(this)}
-        loadEarlier={true}
+        loadEarlier={this.state.hasMore}
         onLoadEarlier={() => this.loadEarlierMessage()}
         user={{
           _id: this.props.chat.jid
