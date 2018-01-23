@@ -31,8 +31,11 @@ class Login extends Component {
 
   componentDidMount() {
     this.props.screenProps.xmpp.login(
-      'faysal', //jid // zibon
-      'qweqwe' // password
+      // '2285d073-6bdd-4d6e-9b22-75978932b917', //jid // zibon
+      // 'qweqwe' // password
+      // '3c619c8e-7ad5-468b-9933-346ec8356cdb'
+      'a695f2f2-7fbb-428f-a7cb-243b5b0ec129',
+      'f2cac896-81cc-4a09-a41b-414d93a14633'
     )
   }
 
@@ -47,8 +50,8 @@ class Login extends Component {
 
     if(this.props.chat.user !== nextProps.chat.user) {
       console.log('changing screen route')
-      // this.props.navigation.navigate('JobList',{name:'job list'})
-      this.props.navigation.navigate('Messenger',{title:'chatting with',user: {publicKey: 'zibon'}})
+      // this.props.navigation.navigate('JobList',{name:'job list'}) // zibon will be in public key
+      this.props.navigation.navigate('Messenger',{title:'chatting with',user: {publicKey: '2617ef20-c07a-4dcf-b2b4-869841e9392d'}})
     }
   }
   render() {

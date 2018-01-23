@@ -27,23 +27,24 @@ class Messenger extends Component {
 
   onIq(iq) {
     console.log('... ', iq)
-    this.setState({past: iq, hasMore : Boolean(iq.query.set.first)}) // require for chat pagination
+    //this.setState({past: iq, hasMore : Boolean(iq.query && iq.query.set && iq.query.set.first)}) // require for chat pagination
   }
 
-
+ // 6 zibon@sendjob
   loadEarlierMessage() {
     const { xmpp } = this.props.screenProps
     const third =
       `<iq type='get' id='get_archive_user1'>
         <query xmlns='urn:xmpp:mam:tmp'>
-          <with>zibon@sendjob</with>
+          <with>2617ef20-c07a-4dcf-b2b4-869841e9392d@sendjobs.co</with>
           <set xmlns='http://jabber.org/protocol/rsm'>
-            <max>6</max>
-            ${this.state.past ? `<before>${this.state.past.query.set.first}</before>`: `<before/>`}
+            <max>3</max>
+            <before/>
           </set>
         </query>
       </iq>`
 
+    // ${this.state.past ? `<before>${this.state.past.query.set.first}</before>`: `<before/>`}
     // <set xmlns='http://jabber.org/protocol/rsm'>
     //  <max>50</max>
     // </set>
@@ -52,7 +53,7 @@ class Messenger extends Component {
   }
 
   onReceiveMessage(text) {
-    console.log('received message ', text.result.id, text.result.forwarded.message.body)
+
     if (!text.body && !text.result)
       return
 
@@ -111,14 +112,16 @@ class Messenger extends Component {
   }
 
   render() {
+    console.log('STATE ', this.state)
+    console.log('PROPS ', this.props)
     return (
       <XMPPMessenger
         xmpp={this.props.screenProps.xmpp}
         chat={this.props.chat}
-        chattingWith={this.props.navigation.state.params.user.publicKey}
+        chattingWith={`2617ef20-c07a-4dcf-b2b4-869841e9392d`}
         onSend={this.onSend}
         onReceiveMessage={this.onReceiveMessage.bind(this)}
-        loadEarlier={this.state.hasMore}
+        loadEarlier={true}
         onLoadEarlier={() => this.loadEarlierMessage()}
         user={{
           _id: this.props.chat.jid

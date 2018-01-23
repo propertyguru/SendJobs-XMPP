@@ -13,7 +13,7 @@
     "react": "^16.0.0",
     "react-native": "0.49.3",
     "react-native-gifted-chat": "https://github.com/faysal515/react-native-gifted-chat.git",
-    "react-native-xmpp": "^0.5.0",
+    "react-native-xmpp": "0.5.0",
     "react-navigation": "^1.0.0-beta.15",
     "react-redux": "^5.0.6",
     "redux": "^3.7.2",

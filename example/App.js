@@ -23,11 +23,12 @@ import store from './js/store'
 import xmpp from 'sendjobs-xmpp/chatHandler'
 
 const config = {
-  domain : 'sendjob',
-  host: 'localhost',
+  // domain : 'sendjob',
+  domain: 'sendjobs.co',
+  host: 'jabber.sendjobs.co',
   port: 5222,
   schema: 'mobile',
-  authType: 0 // 0 -> plain auth, 1-> scram, 2-> md5digest
+  authType: 'PLAIN' // 0 -> plain auth, 1-> scram, 2-> md5digest
 }
 const Main = StackNavigator({
   Login: {
