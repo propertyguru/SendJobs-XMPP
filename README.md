@@ -1,96 +1,95 @@
-# SendJobs XMPP
+# react-native-xmpp
 
-## Usage
+An XMPP library for React Native.
 
- To use this component, you'll need to have installed this
- packages on your react native project
- 
- - [react-native-xmpp] [rnx]
- - [gifted-chat(forked)] [fgc]
- 
- Please make sure you follow the proper installation process of
-  [react-native-xmpp] [rnx]. The `RNXMPP` Native Modules need to be accessible in your project
-  otherwise, this package wont work
-  
-  **hint**: To install a package from a git source, run
-  ```
-  npm install  --save your-public-project-github-url
-  or
-  yarn add your-public-project-github-url
-  ```
-  
-  
- This package comes with 3 exports modules serving different 
- purposes
- 
- - XmppStore
- - XMPPMessenger
- - a reducer object (optional)
- 
- 
- ### XmppStore
- 
- xmppstore uses `react-native-xmpp` object in behind and expects you to initialize with 
- your ejabberd/xmpp server settings
- 
- ```jsx harmony
- import xmpp from 'sendjobs-xmpp/chatHandler'
- 
- // .... 
-const config = {
-  domain : 'mydomain',
-  host: 'localhost',
-  port: 5222,
-  schema: 'mobile',
-  authType: 0 // 0 -> plain auth, 1-> scram, 2-> md5digest
-}
+A simple interface for native XMPP communication. Both iOS and Android are supported.
 
-// ...
-let xmpp = new xmpp(config)
-``` 
-#### XmppStore - available methods
- -- --
- ```
-- xmpp.login(
-      'xxxx', // only the jid. no need to put @domain
-      'xxxx' // password
-    )
-    
-- xmpp.sendMessage('message here', 'toJID')
+## Demo
+
+XmppDemo uses a Flux approach (check its `XmppStore`) to communicate with a sample XMPP server, where 4 accounts were registered.
+
+![demo-3](https://cloud.githubusercontent.com/assets/1321329/10537760/406affa6-73f4-11e5-986f-81a78adf129e.gif)
+
+## Example
+
+```js
+var XMPP = require('react-native-xmpp');
+
+// optional callbacks
+XMPP.on('message', (message) => console.log('MESSAGE:' + JSON.stringify(message)));
+XMPP.on('iq', (message) => console.log('IQ:' + JSON.stringify(message)));
+XMPP.on('presence', (message) => console.log('PRESENCE:' + JSON.stringify(message)));
+XMPP.on('error', (message) => console.log('ERROR:' + message));
+XMPP.on('loginError', (message) => console.log('LOGIN ERROR:' + message));
+XMPP.on('login', (message) => console.log('LOGGED!'));
+XMPP.on('connect', (message) => console.log('CONNECTED!'));
+XMPP.on('disconnect', (message) => console.log('DISCONNECTED!'));
+
+// trustHosts (ignore self-signed SSL issues)
+// Warning: Do not use this in production (security will be compromised).
+XMPP.trustHosts(['chat.google.com']);
+
+// connect
+XMPP.connect(MYJID, MYPASSWORD);
+
+// send message
+XMPP.message('Hello world!', TOJID);
+
+// disconnect
+XMPP.disconnect();
+
+// remove all event listeners (recommended on componentWillUnmount)
+XMPP.removeListeners();
+
+// remove specific event listener (type can be 'message', 'iq', etc.)
+XMPP.removeListener(TYPE);
 ```
 
-You'll have to add your own event listener in your component
-to make everything work. `xmpp.xmppObject` lets you access `on`
-callback of native `RNXMPP` object. for more information
-click [here] [index]
- 
- 
-  ### XMPPMessenger
-  
-  available props
-  
-  ```javascript
-XMPPMessenger.propTypes = {
-  xmpp: PropTypes.object,
-  chat: PropTypes.object,
-  chattingWith: PropTypes.string,
-  onSend: PropTypes.func,
-  user: PropTypes.object,
-  parsePatterns: PropTypes.func,
-  systemMessageParsePatterns: PropTypes.func
+## Getting started
 
+1. `npm install react-native-xmpp --save`
+2. `rnpm link react-native-xmpp`
+
+### iOS
+
+In the Xcode project navigator, select your project, select the `Build Phases` tab and in the `Link Binary With Libraries` section add, **`libRNXMPP.a`**, **`libresolv`** and **`libxml2`**.
+
+### Android
+
+If rnpm doesn't link the react-native-xmpp correct:
+
+**android/settings.gradle**
+
+```gradle
+include ':react-native-xmpp'
+project(':react-native-xmpp').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-xmpp/android')
+```
+
+**android/app/build.gradle**
+
+```gradle
+dependencies {
+   ...
+   compile project(':react-native-xmpp')
 }
 ```
- - **xmpp:**  the xmpp object you initialized in your component
- - **chat:** this is the primary object that will store messages,logged in
- jid. see the structure [here] [reducer]
- - **chattingWith:** jid of the person you are chatting with
- - other props will be passed down to gifted-chat component
- 
- **a working example has been attached in the repo**
-  
-  
-  [rnx]: <https://github.com/aksonov/react-native-xmpp/>
-  [fgc]: <https://github.com/faysal515/react-native-gifted-chat>
-  [index]: <https://github.com/aksonov/react-native-xmpp/blob/master/index.js>
-  [reducer]: <https://github.com/sendhelper/SendJobs-XMPP/blob/master/reducer.js>
+
+**MainApplication.java**
+
+On top, where imports are:
+
+```java
+import rnxmpp.RNXMPPPackage;
+```
+
+Add the `ReactVideoPackage` class to your list of exported packages.
+
+```java
+@Override
+protected List<ReactPackage> getPackages() {
+    return Arrays.<ReactPackage>asList(
+        new MainReactPackage(),
+        new RNXMPPPackage()
+    );
+}
+```

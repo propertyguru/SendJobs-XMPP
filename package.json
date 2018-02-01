@@ -1,14 +1,25 @@
 {
-  "name": "sendjobs-xmpp",
-  "version": "0.0.1",
-  "description": "xmpp integrated with gifted chat",
+  "name": "react-native-xmpp",
+  "version": "1.0.0-beta.1",
+  "description": "XMPP Library for React Native",
   "main": "index.js",
-  "author": "faysal ahmed,sendjobs",
-  "license": "MIT",
-  "peerDependencies": {
-    "prop-types": "^15.6.0",
-    "react": "^16.0.0",
-    "react-native-xmpp": "^0.5.0",
-    "react-native-gifted-chat": "git+https://github.com/faysal515/react-native-gifted-chat.git"
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aksonov/react-native-xmpp.git"
+  },
+  "keywords": [
+    "xmpp",
+    "react-native",
+    "xmppframework"
+  ],
+  "author": {
+    "name": "Pavlo Aksonov"
+  },
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/aksonov/react-native-xmpp/issues"
   }
 }
