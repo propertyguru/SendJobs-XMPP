@@ -92,7 +92,7 @@ public class XmppServiceSmackImpl implements XmppService, ChatManagerListener, S
                 .setUsernameAndPassword(jidParts[0], password)
                 .setConnectTimeout(3000)
                 //.setDebuggerEnabled(true)
-                .setSecurityMode(ConnectionConfiguration.SecurityMode.required);
+                .setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
 
         if (serviceNameParts.length>1){
             confBuilder.setResource(serviceNameParts[1]);
@@ -111,36 +111,10 @@ public class XmppServiceSmackImpl implements XmppService, ChatManagerListener, S
         XMPPTCPConnectionConfiguration connectionConfiguration = confBuilder.build();
         connection = new XMPPTCPConnection(connectionConfiguration);
 
-       // connection.addAsyncStanzaListener(this, new OrFilter(new StanzaTypeFilter(IQ.class), new StanzaTypeFilter(Presence.class)));
+        connection.addAsyncStanzaListener(this, new OrFilter(new StanzaTypeFilter(IQ.class), new StanzaTypeFilter(Presence.class),new StanzaTypeFilter(Message.class)));
         connection.addConnectionListener(this);
-        connection.addAsyncStanzaListener(this, StanzaTypeFilter.MESSAGE);
 
-
-
-        connection.addAsyncStanzaListener(new StanzaListener() {
-            @Override
-            public void processPacket(Stanza packet) throws SmackException.NotConnectedException {
-                Presence presence = (Presence)packet;
-
-                if(presence != null)
-                    xmppServiceListener.onPresence(presence);
-
-            }
-        }, StanzaTypeFilter.PRESENCE);
-
-
-        connection.addAsyncStanzaListener(new StanzaListener() {
-            @Override
-            public void processPacket(Stanza p) throws SmackException.NotConnectedException {
-                IQ packet = (IQ) p;
-                if (packet != null) {
-                    xmppServiceListener.onIQ(packet);
-                }
-            }
-        }, StanzaTypeFilter.IQ);
-
-
-      //  ChatManager.getInstanceFor(connection).addChatListener(this);
+        ChatManager.getInstanceFor(connection).addChatListener(this);
         roster = Roster.getInstanceFor(connection);
         roster.addRosterLoadedListener(this);
 
@@ -171,9 +145,6 @@ public class XmppServiceSmackImpl implements XmppService, ChatManagerListener, S
 
     @Override
     public void message(String text, String to, String thread) {
-
-        System.out.println("** ** ** message send?");
-
         String chatIdentifier = (thread == null ? to : thread);
 
         ChatManager chatManager = ChatManager.getInstanceFor(connection);
@@ -249,7 +220,6 @@ public class XmppServiceSmackImpl implements XmppService, ChatManagerListener, S
     public void sendStanza(String stanza) {
         StanzaPacket packet = new StanzaPacket(stanza);
         try {
-            System.out.println("** ** ** sending stanza");
             connection.sendPacket(packet);
         } catch (SmackException e) {
             logger.log(Level.WARNING, "Could not send stanza", e);
@@ -262,21 +232,30 @@ public class XmppServiceSmackImpl implements XmppService, ChatManagerListener, S
     }
 
     @Override
-    public void processPacket(Stanza p) throws SmackException.NotConnectedException {
-
-        Message packet = (Message)p;
+    public void processPacket(Stanza packet) throws SmackException.NotConnectedException {
+        if (packet instanceof IQ){
+            this.xmppServiceListener.onIQ((IQ) packet);
+        }else if (packet instanceof Presence){
+            this.xmppServiceListener.onPresence((Presence) packet);
+        }else if (packet instanceof Message){
+		
+		Message packett = (Message)packet;
         System.out.println("** ** ** process packet call");
 
 
-        MamElements.MamResultExtension result = (MamElements.MamResultExtension)packet.getExtension("result",MamElements.NAMESPACE);
+        MamElements.MamResultExtension result = (MamElements.MamResultExtension)packett.getExtension("result",MamElements.NAMESPACE);
         if(result != null){
             System.out.println("** ** ** resultrrrrrrrrrrrrrrrrr " + result.toXML());
             this.xmppServiceListener.onForwarded(result);
-        }
-        else{
-            System.out.println("** ** ** no result " + packet.toXML());
-            this.xmppServiceListener.onMessage(packet);
-
+		}else{
+		
+		System.out.println("** ** ** no result " + packett.toXML());
+            this.xmppServiceListener.onMessage(packett);
+		}
+		
+		
+		}else{
+            logger.log(Level.WARNING, "Got a Stanza, of unknown subclass", packet.toXML());
         }
     }
 
@@ -292,8 +271,6 @@ public class XmppServiceSmackImpl implements XmppService, ChatManagerListener, S
 
     @Override
     public void processMessage(Chat chat, Message message) {
-        System.out.println("** ** ** chat process message");
-
         this.xmppServiceListener.onMessage(message);
     }
 
