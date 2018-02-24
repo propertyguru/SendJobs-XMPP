@@ -31,7 +31,7 @@ class Login extends Component {
 
   componentDidMount() {
     this.props.screenProps.xmpp.login(
-      'faysal', //jid // zibon
+      'f.dev', //jid // zibon
       'qweqwe' // password
     )
   }
@@ -48,7 +48,7 @@ class Login extends Component {
     if(this.props.chat.user !== nextProps.chat.user) {
       console.log('changing screen route')
       // this.props.navigation.navigate('JobList',{name:'job list'})
-      this.props.navigation.navigate('Messenger',{title:'chatting with',user: {publicKey: 'zibon'}})
+      this.props.navigation.navigate('Messenger',{title:'chatting with',user: {publicKey: 'z.dev'}})
     }
   }
   render() {
@@ -80,7 +80,7 @@ class Login extends Component {
 
           <View>
             <Text>
-              faysal || qweqwe
+              f.dev || qweqwe
             </Text>
           </View>
         </View>

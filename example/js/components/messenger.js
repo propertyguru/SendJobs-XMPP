@@ -3,6 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
+  Platform
 } from 'react-native'
 import {connect} from 'react-redux'
 import uuidv4 from 'uuid/v4'
@@ -25,24 +26,38 @@ class Messenger extends Component {
     this.props.screenProps.xmpp.xmppObject.on('iq', this.onIq.bind(this))
   }
 
+  componentDidMount() {
+    //console.log('... ', parseString)
+    // var xml = "<root>Hello xml2js!</root>"
+
+  }
+
   onIq(iq) {
     console.log('... ', iq)
-    this.setState({past: iq, hasMore : Boolean(iq.query.set.first)}) // require for chat pagination
+    //this.setState({past: iq, hasMore : Boolean(iq.query.set.first)}) // require for chat pagination
   }
 
 
   loadEarlierMessage() {
+    console.log('STATE ', this.state)
     const { xmpp } = this.props.screenProps
     const third =
-      `<iq type='get' id='get_archive_user1'>
-        <query xmlns='urn:xmpp:mam:tmp'>
-          <with>zibon@sendjob</with>
-          <set xmlns='http://jabber.org/protocol/rsm'>
-            <max>6</max>
-            ${this.state.past ? `<before>${this.state.past.query.set.first}</before>`: `<before/>`}
-          </set>
-        </query>
-      </iq>`
+      `<iq type='set' id='get_archive_user1'>
+  <query xmlns='urn:xmpp:mam:0'>
+    <x xmlns='jabber:x:data' type='submit'>
+      <field var='FORM_TYPE' type='hidden'>
+        <value>urn:xmpp:mam:0</value>
+      </field>
+      <field var='with'>
+        <value>z.dev@sendjobs.co</value>
+      </field>
+    </x>
+    <set xmlns='http://jabber.org/protocol/rsm'>
+     <max>10</max>
+     ${this.state.past ? `<before>${this.state.past.fin.set.first}</before>`: `<before/>`}
+    </set>
+  </query>
+</iq>`
 
     // <set xmlns='http://jabber.org/protocol/rsm'>
     //  <max>50</max>
@@ -51,8 +66,41 @@ class Messenger extends Component {
     xmpp.xmppObject.sendStanza(third)
   }
 
+
   onReceiveMessage(text) {
-    console.log('received message ', text.result.id, text.result.forwarded.message.body)
+
+    if (Platform.OS === 'ios' && text.fin && text.fin.set) {
+      this.setState({past: text, hasMore : Boolean(text.fin.set.first)})
+
+    }
+
+    if( Platform.OS === 'android' && !text.body) {
+      // const regex = /<fin (.+)><first>(.+)<\/first><last>(.+)<\/last>/g
+      const regex = /<fin (.+)><first>(.+)<\/first><last>(.+)<\/last><\/fin>|<fin.+><\/fin>/g
+      const result = regex.exec(text.src)
+      // const result2 = regex2.exec(text.src)
+      console.log('REGEX ', result)
+      // console.log('2222  ', result2)
+      // if the first portion of the regex match, then there will be at least 3 group capture
+      if(result !== null) {
+        const past = {
+          fin: {
+            set: {
+              first: result[2],
+              last: result[3]
+            }
+          }
+        }
+        this.setState({past, hasMore: Boolean(result[2])})
+      }
+    }
+
+    // <fin (.+)><first>(.+)<\/first><last>(.+)<\/last>
+    // if(text.forwarded) {
+    //   console.log('history message ', text.body)
+    // } else {
+    //   console.log('received message ', text)
+    // }
     if (!text.body && !text.result)
       return
 
@@ -115,7 +163,7 @@ class Messenger extends Component {
       <XMPPMessenger
         xmpp={this.props.screenProps.xmpp}
         chat={this.props.chat}
-        chattingWith={this.props.navigation.state.params.user.publicKey}
+        chattingWith={`z.dev`}
         onSend={this.onSend}
         onReceiveMessage={this.onReceiveMessage.bind(this)}
         loadEarlier={this.state.hasMore}
