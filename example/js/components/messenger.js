@@ -24,13 +24,14 @@ class Messenger extends Component {
     this.renderSystemMessage = this.renderSystemMessage.bind(this);
     this.onSend = this.onSend.bind(this)
     this.props.screenProps.xmpp.xmppObject.on('iq', this.onIq.bind(this))
+    this.props.screenProps.xmpp.xmppObject.on('messageSend', this.messageSend.bind(this))
   }
 
-  componentDidMount() {
-    //console.log('... ', parseString)
-    // var xml = "<root>Hello xml2js!</root>"
-
-  }
+  // componentDidMount() {
+  //   // console.log('... ', user)
+  //   // var xml = "<root>Hello xml2js!</root>"
+  //
+  // }
 
   onIq(iq) {
     console.log('... ', iq)
@@ -39,8 +40,10 @@ class Messenger extends Component {
 
 
   loadEarlierMessage() {
+    //<value>b2bea690-65d0-4b4a-93b9-d9bbec9cd6c2@sendjobs.co</value>
     console.log('STATE ', this.state)
     const { xmpp } = this.props.screenProps
+    const { user } = this.props.navigation.state.params
     const third =
       `<iq type='set' id='get_archive_user1'>
   <query xmlns='urn:xmpp:mam:0'>
@@ -49,11 +52,11 @@ class Messenger extends Component {
         <value>urn:xmpp:mam:0</value>
       </field>
       <field var='with'>
-        <value>z.dev@sendjobs.co</value>
+        <value>${user.publicKey}@sendjobs.co</value>
       </field>
     </x>
     <set xmlns='http://jabber.org/protocol/rsm'>
-     <max>10</max>
+     <max>3</max>
      ${this.state.past ? `<before>${this.state.past.fin.set.first}</before>`: `<before/>`}
     </set>
   </query>
@@ -68,6 +71,8 @@ class Messenger extends Component {
 
 
   onReceiveMessage(text) {
+    console.log('>> ', text)
+    //b2bea690-65d0-4b4a-93b9-d9bbec9cd6c2@sendjobs.co
 
     if (Platform.OS === 'ios' && text.fin && text.fin.set) {
       this.setState({past: text, hasMore : Boolean(text.fin.set.first)})
@@ -75,8 +80,7 @@ class Messenger extends Component {
     }
 
     if( Platform.OS === 'android' && !text.body) {
-      // const regex = /<fin (.+)><first>(.+)<\/first><last>(.+)<\/last>/g
-      const regex = /<fin (.+)><first>(.+)<\/first><last>(.+)<\/last><\/fin>|<fin.+><\/fin>/g
+      const regex = /<fin (.+)>(<first>(.+)<\/first><last>(.+)<\/last>|<last>(.+)<\/last><first>(.+)<\/first>)<\/fin>|<fin.+><\/fin>/g
       const result = regex.exec(text.src)
       // const result2 = regex2.exec(text.src)
       console.log('REGEX ', result)
@@ -94,13 +98,6 @@ class Messenger extends Component {
         this.setState({past, hasMore: Boolean(result[2])})
       }
     }
-
-    // <fin (.+)><first>(.+)<\/first><last>(.+)<\/last>
-    // if(text.forwarded) {
-    //   console.log('history message ', text.body)
-    // } else {
-    //   console.log('received message ', text)
-    // }
     if (!text.body && !text.result)
       return
 
@@ -108,7 +105,7 @@ class Messenger extends Component {
       const { message, delay } = text.result.forwarded
       let {params} = this.props.navigation.state
       this.props.fetchMessage({
-        _id: uuidv4(),
+        _id: message.id,
         text: message.body,
         createdAt: new Date(delay.stamp),
         user: {
@@ -119,8 +116,10 @@ class Messenger extends Component {
     }
 
     if(text.body) {
+      console.log('here i should do seen....')
+      this.props.screenProps.xmpp.xmppObject.sendSeenNotif(text.src)
       this.props.receiveMessage({
-        _id: uuidv4(),
+        _id: text.id,
         text: text.body,
         createdAt: new Date(),
         user: {
@@ -131,10 +130,20 @@ class Messenger extends Component {
 
   }
 
+  messageSend(msgId) {
+    console.log('sending msg id ', msgId)
+    const {message} = this.state
+    message._id = msgId
+    this.props.sendMessage(message)
+    this.setState({message: null})
+  }
+
   onSend(msg) {
+    console.log('sending ... ', msg)
     let {params} = this.props.navigation.state
     msg.recipient = params.user.publicKey
-    this.props.sendMessage(msg)
+    // this.props.sendMessage(msg)
+    this.setState({message: msg})
   }
 
   renderSystemMessage(props) {
@@ -159,11 +168,14 @@ class Messenger extends Component {
   }
 
   render() {
+    //b2bea690-65d0-4b4a-93b9-d9bbec9cd6c2
+    const { user } = this.props.navigation.state.params
     return (
       <XMPPMessenger
         xmpp={this.props.screenProps.xmpp}
         chat={this.props.chat}
-        chattingWith={`z.dev`}
+        chattingWith={user.publicKey}
+        messageIdGenerator={() => new Date().getTime()}
         onSend={this.onSend}
         onReceiveMessage={this.onReceiveMessage.bind(this)}
         loadEarlier={this.state.hasMore}

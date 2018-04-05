@@ -33,12 +33,15 @@ class Login extends Component {
     this.props.screenProps.xmpp.login(
       'f.dev', //jid // zibon
       'qweqwe' // password
+      // '27b46098-fc0f-4de2-8f97-e0ef36b22eca',
+      // 'e7741903-acec-4232-b6e0-348ece09b392'
+
     )
   }
 
 
   handleSubmit() {
-    let {xmpp} = this.props.screenProps
+    let {xmpp} = this.props
     //console.log('yay', this.props)
     xmpp.login(this.state.username, this.state.password)
   }
@@ -48,6 +51,7 @@ class Login extends Component {
     if(this.props.chat.user !== nextProps.chat.user) {
       console.log('changing screen route')
       // this.props.navigation.navigate('JobList',{name:'job list'})
+      //this.props.navigation.navigate('Messenger',{title:'chatting with',user: {publicKey: 'b2bea690-65d0-4b4a-93b9-d9bbec9cd6c2'}})
       this.props.navigation.navigate('Messenger',{title:'chatting with',user: {publicKey: 'z.dev'}})
     }
   }
