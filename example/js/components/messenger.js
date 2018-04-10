@@ -69,9 +69,9 @@ class Messenger extends Component {
     xmpp.xmppObject.sendStanza(third)
   }
 
-
+// acknowledgement
   onReceiveMessage(text) {
-    console.log('>> ', text)
+    console.log('>> ', text) // text.src
     //b2bea690-65d0-4b4a-93b9-d9bbec9cd6c2@sendjobs.co
 
     if (Platform.OS === 'ios' && text.fin && text.fin.set) {
@@ -116,8 +116,8 @@ class Messenger extends Component {
     }
 
     if(text.body) {
-      console.log('here i should do seen....')
-      this.props.screenProps.xmpp.xmppObject.sendSeenNotif(text.src)
+      console.log('here i should do seen....', text.src)
+     this.props.screenProps.xmpp.xmppObject.sendSeenNotif(text.src)
       this.props.receiveMessage({
         _id: text.id,
         text: text.body,

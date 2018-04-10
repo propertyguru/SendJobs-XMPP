@@ -3819,9 +3819,9 @@ react-native-tab-view@^0.0.69:
   dependencies:
     prop-types "^15.5.8"
 
-"react-native-xmpp@https://github.com/sendhelper/react-native-xmpp.git":
+"react-native-xmpp@https://github.com/faysal515/react-native-xmpp.git":
   version "1.0.0-beta.1"
-  resolved "https://github.com/sendhelper/react-native-xmpp.git#34ede4fe1e11b0c5f940d3b2ef053dba621dccc3"
+  resolved "https://github.com/faysal515/react-native-xmpp.git#591b327499ff8f19c2c8ca3933b08ff2fe325f83"
 
 react-native@0.49.3:
   version "0.49.3"
