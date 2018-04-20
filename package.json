@@ -8,7 +8,7 @@
   "peerDependencies": {
     "prop-types": "^15.6.0",
     "react": "^16.0.0",
-    "react-native-xmpp": "git+https://github.com/sendhelper/react-native-xmpp.git",
+    "react-native-xmpp": "https://github.com/faysal515/react-native-xmpp.git",
     "react-native-gifted-chat": "git+https://github.com/faysal515/react-native-gifted-chat.git"
   }
 }

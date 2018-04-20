@@ -49,14 +49,18 @@ class XMPPMessenger extends Component {
   }
 }
 
+XMPPMessenger.defaultProps = {
+  onReceiveMessage: () => {},
+}
+
 XMPPMessenger.propTypes = {
-  xmpp: PropTypes.object,
-  chat: PropTypes.object,
-  chattingWith: PropTypes.string,
-  onSend: PropTypes.func,
-  user: PropTypes.object,
-  parsePatterns: PropTypes.func,
-  systemMessageParsePatterns: PropTypes.func
+  xmpp: PropTypes.object.isRequired,
+  chat: PropTypes.object.isRequired,
+  chattingWith: PropTypes.string.isRequired,
+  onSend: PropTypes.func.isRequired,
+  user: PropTypes.object.isRequired,
+  parsePatterns: PropTypes.func.isRequired,
+  systemMessageParsePatterns: PropTypes.func.isRequired,
 
 }
 
