@@ -12,11 +12,11 @@ class XMPPMessenger extends Component {
 
   componentDidMount() {
     const {xmpp} = this.props
-    xmpp.xmppObject.on('message', this.onReceiveMessage.bind(this))
+    // xmpp.xmppObject.on('message', this.onReceiveMessage.bind(this))
   }
 
   onReceiveMessage(text) {
-    this.props.onReceiveMessage(text)
+    // this.props.onReceiveMessage(text)
   }
 
 
