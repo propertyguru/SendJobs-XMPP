@@ -21,12 +21,19 @@ class XMPPMessenger extends Component {
 
 
   onSend(messages = []) {
-    const {xmpp} = this.props
-    const {settings} = this.props.xmpp
-    const {chattingWith} = this.props
-
-    xmpp.sendMessage(messages[0].text, `${chattingWith}@${settings.domain}`)
+    const { xmpp } = this.props
+    const { settings } = this.props.xmpp
+    const { chattingWith } = this.props
     this.props.onSend(messages[0])
+    // xmpp.sendMessage(messages[0].text, `${chattingWith}@${settings.domain}`) // change this
+    if(this.props.isLoggedIn){
+       xmpp.sendMessage(messages[0].text, `${chattingWith}@${settings.domain}`)
+    }
+    else{
+      if(this.props.cacheAction)
+        this.props.cacheAction({message:messages[0],to:`${chattingWith}@${settings.domain}`})
+    }
+ 
 
     // ^^ gifted chat push an array of message. we require the first
     // one. thus sending only one
